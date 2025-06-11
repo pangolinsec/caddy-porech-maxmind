@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag caddy-porech-maxmind:$(date +%s)  --build-arg CADDY_VERSION=${{ env.CADDYVERSION }} .
+      run: docker build . --file Dockerfile --tag caddy-porech-maxmind:$(date +%s)  --build-arg CADDY_VERSION=${{ env.CADDYVERSION }}
