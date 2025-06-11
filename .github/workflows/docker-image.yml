@@ -17,8 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag caddy-porech-maxmind:$(date +%s)  --build-arg CADDY_VERSION=${{ vars.CADDYVERSION }}
+      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:$(date +%Y%m%d) --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:${{ vars.CADDYVERSION }} --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:latest --build-arg CADDY_VERSION=${{ vars.CADDYVERSION }}
     - name: Login to DockerHub Registry
       run: echo ${{ secrets.DOCKERHUB_PAT }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-    - name: Push the Docker image to the registry
-      run: docker push -a caddy-porech-maxmind
+    - name: Push all tags for the Docker image to the registry
+      run: docker push -a ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind
