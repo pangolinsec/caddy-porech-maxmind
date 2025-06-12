@@ -3,6 +3,12 @@ name: Docker Image CI
 on:
   workflow_dispatch:
     branches: [ "main" ]
+    inputs:
+      caddy_version:
+        description: 'Caddy version to build'
+        required: false
+        type: string
+        default: ''
   push:
     branches: [ "main" ]
   pull_request:
@@ -16,8 +22,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Determine Caddy version
+      id: version
+      run: |
+        if [ -n "${{ inputs.caddy_version }}" ]; then
+          echo "Using input version: ${{ inputs.caddy_version }}"
+          echo "caddy_version=${{ inputs.caddy_version }}" >> $GITHUB_OUTPUT
+        else
+          echo "Using repository variable: ${{ vars.CADDY_VERSION }}"
+          echo "caddy_version=${{ vars.CADDY_VERSION }}" >> $GITHUB_OUTPUT
+        fi
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:$(date +%Y%m%d) --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:${{ vars.CADDYVERSION }} --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:latest --build-arg CADDY_VERSION=${{ vars.CADDYVERSION }}
+      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:$(date +%Y%m%d) --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:${{ steps.version.outputs.caddy_version }} --tag ${{ secrets.DOCKERHUB_USERNAME }}/caddy-porech-maxmind:latest --build-arg CADDY_VERSION=${{ steps.version.outputs.caddy_version }}
     - name: Login to DockerHub Registry
       run: echo ${{ secrets.DOCKERHUB_PAT }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
     - name: Push all tags for the Docker image to the registry
