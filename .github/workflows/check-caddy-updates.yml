@@ -56,4 +56,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT }}
           NEW_TAG: ${{ needs.check-updates.outputs.new-tag }}
         run: |
-          gh workflow run docker-image.yml -f caddy_version="$NEW_TAG"
+          gh workflow run docker-image.yml -f caddy_version="$NEW_TAG" --ref main
