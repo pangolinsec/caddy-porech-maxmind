@@ -1,0 +1,59 @@
+name: Check Caddy Updates
+
+on:
+  schedule:
+    # Check daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+    outputs:
+      new-tag: ${{ steps.check.outputs.new-tag }}
+      update-available: ${{ steps.check.outputs.update-available }}
+    steps:
+      - name: Check for new Caddy version
+        id: check
+        run: |
+          # Get current stored version
+          CURRENT_TAG="${{ vars.CADDY_VERSION }}"
+          echo "Current stored tag: $CURRENT_TAG"
+          
+          # Get latest tag from Docker Hub API
+          LATEST_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/library/caddy/tags?page_size=100" | \
+            jq -r '.results[] | select(.name | test("^[0-9]+\\.[0-9]+\\.[0-9]+$")) | .name' | \
+            sort -V | tail -1)
+          
+          echo "Latest available tag: $LATEST_TAG"
+          
+          if [ "$CURRENT_TAG" != "$LATEST_TAG" ]; then
+            echo "New version available!"
+            echo "new-tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+            echo "update-available=true" >> $GITHUB_OUTPUT
+          else
+            echo "No update needed"
+            echo "update-available=false" >> $GITHUB_OUTPUT
+          fi
+
+  update-and-build:
+    needs: check-updates
+    if: needs.check-updates.outputs.update-available == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update repository variable
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ needs.check-updates.outputs.new-tag }}
+        run: |
+          gh variable set CADDY_VERSION --body "$NEW_TAG"
+
+      - name: Trigger build workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ needs.check-updates.outputs.new-tag }}
+        run: |
+          gh workflow run docker-image.yml -f caddy_version="$NEW_TAG"
