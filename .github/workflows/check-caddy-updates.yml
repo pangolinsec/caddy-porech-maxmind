@@ -46,14 +46,14 @@ jobs:
 
       - name: Update repository variable
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
           NEW_TAG: ${{ needs.check-updates.outputs.new-tag }}
         run: |
           gh variable set CADDY_VERSION --body "$NEW_TAG"
 
       - name: Trigger build workflow
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
           NEW_TAG: ${{ needs.check-updates.outputs.new-tag }}
         run: |
           gh workflow run docker-image.yml -f caddy_version="$NEW_TAG"
