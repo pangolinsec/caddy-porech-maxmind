@@ -17,7 +17,7 @@ jobs:
         id: check
         run: |
           # Get current stored version
-          CURRENT_TAG="${{ vars.CAaDDY_VERSION }}"
+          CURRENT_TAG="${{ vars.CADDY_VERSION }}"
           echo "Current stored tag: $CURRENT_TAG"
           
           # Get latest tag from Docker Hub API
@@ -27,7 +27,7 @@ jobs:
           
           echo "Latest available tag: $LATEST_TAG"
           
-          if [ "$CURRENT_TAG" != "$LATEST_TAG" ]; then
+          ; then
             echo "New version available!"
             echo "new-tag=$LATEST_TAG" >> $GITHUB_OUTPUT
             echo "update-available=true" >> $GITHUB_OUTPUT
