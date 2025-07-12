@@ -27,7 +27,7 @@ jobs:
           
           echo "Latest available tag: $LATEST_TAG"
           
-          ; then
+          if [ "$CURRENT_TAG" != "$LATEST_TAG" ]; then
             echo "New version available!"
             echo "new-tag=$LATEST_TAG" >> $GITHUB_OUTPUT
             echo "update-available=true" >> $GITHUB_OUTPUT
