@@ -17,11 +17,11 @@ jobs:
         id: check
         run: |
           # Get current stored version
-          CURRENT_TAG="${{ vars.CADDY_VERSION }}"
+          CURRENT_TAG="${{ vars.CAaDDY_VERSION }}"
           echo "Current stored tag: $CURRENT_TAG"
           
           # Get latest tag from Docker Hub API
-          LATEST_TAG=$(curl -s "https://registry.hub.docker.com/v2/reposaitories/library/caddy/tags?page_size=100" | \
+          LATEST_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/library/caddy/tags?page_size=100" | \
             jq -r '.results[] | select(.name | test("^[0-9]+\\.[0-9]+\\.[0-9]+$")) | .name' | \
             sort -V | tail -1)
           
